@@ -8,13 +8,13 @@ Two rate-limiting strategies are supported, selectable per request:
 • Token Bucket (default) - allows short bursts, refills continuously
 • Sliding Window - counts requests in a rolling time window, no burst allowance
 
-#**Tech stack**
+# **Tech stack**
 • Python - core algorithm and API logic
 • FastAPI - HTTP layer, request handling, status codes
 • Redis (via Docker) - persistent, atomic storage for bucket/window state
 • k6 - load testing
 
-#**How it works**
+# **How it works**
 1. A client sends GET /check with an X-Client-Id header.
 2. The server looks up that client's bucket in Redis (or creates one if new).
 3. Time-based refill is calculated: refill = elapsed_time × refill_rate, capped at max capacity.
@@ -23,7 +23,7 @@ Two rate-limiting strategies are supported, selectable per request:
 5. The updated state is saved back to Redis.
 6. The response includes an X-RateLimit-Remaining header showing tokens/requests left.
 
-#**API**
+# **API**
 GET /check
 
 Headers:
@@ -36,7 +36,7 @@ Query Parameters:
 | ----- | ------- | ------------------ | ------------------------------------- |
 | mode  | bucket  | 	bucket, sliding  | 	Which rate-limiting strategy to use  |
 
-#**Responses:**
+# **Responses:**
 **Allowed:**
 _200 OK
 X-RateLimit-Remaining: 3.5
@@ -47,7 +47,7 @@ _429 Too Many Requests
 X-RateLimit-Remaining: 0
 {"detail": "Try After Sometime"}_
 
-#**Running locally**
+# **Running locally**
 _**Prerequisites:** Python 3.x, Docker Desktop_
 
 1. **Start Redis:**
@@ -73,16 +73,13 @@ k6 run loadtest.js_
 
 **Result**: 500 concurrent virtual users, 600+ requests/second sustained, correct allow/deny decisions throughout — with fewer than 1% of requests failing at the connection level (OS-level socket limits on a single local dev machine, not application logic).
 
-#** What I'd add next**
-
+# ** What I'd add next**
 • Per-client configurable limits via an admin endpoint (currently global constants)
 • TTL on Redis keys so inactive clients' data expires automatically
 • Distributed mode — multiple rate limiter instances sharing state correctly
 • Production-grade deployment (multiple workers behind a load balancer, container orchestration)
 
-
-#**What I learned**
-
+# **What I learned**
 • Why elapsed-time-based refill (not fixed "ticks") is required for correctness
 • How Redis's atomic command execution solves race conditions without manual locking
 • Why persistence matters — proved it by draining a client's tokens, restarting the server, and confirming Redis remembered the state
