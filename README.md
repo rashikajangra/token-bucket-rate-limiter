@@ -5,14 +5,14 @@ A standalone rate-limiting API; not a library, but a real networked service that
 Every client (identified by an X-Client-Id header) gets their own isolated "bucket" of tokens. Each request costs 1 token. Tokens refill continuously over time, up to a max capacity. When a client runs out of tokens, further requests are denied with a 429 Too Many Requests until enough time passes for tokens to refill.
 
 Two rate-limiting strategies are supported, selectable per request:
-• Token Bucket (default) — allows short bursts, refills continuously
-• Sliding Window — counts requests in a rolling time window, no burst allowance
+• Token Bucket (default) - allows short bursts, refills continuously
+• Sliding Window - counts requests in a rolling time window, no burst allowance
 
 #**Tech stack**
-• Python — core algorithm and API logic
-• FastAPI — HTTP layer, request handling, status codes
-• Redis (via Docker) — persistent, atomic storage for bucket/window state
-• k6 — load testing
+• Python - core algorithm and API logic
+• FastAPI - HTTP layer, request handling, status codes
+• Redis (via Docker) - persistent, atomic storage for bucket/window state
+• k6 - load testing
 
 #**How it works**
 1. A client sends GET /check with an X-Client-Id header.
@@ -24,62 +24,52 @@ Two rate-limiting strategies are supported, selectable per request:
 6. The response includes an X-RateLimit-Remaining header showing tokens/requests left.
 
 #**API**
-'''GET /check'''
+GET /check
 
-_Headers:_
+Headers:
 | Header      | Required |                 Description                |
 | ----------- | -------- | ------------------------------------------ |
 | X-Client-ID | Row 1 B  | 	Identifies the client making the request  |
 
-_Query Parameters:_
+Query Parameters:
 | Param | Default |      Options       |              Description              |
 | ----- | ------- | ------------------ | ------------------------------------- |
 | mode  | bucket  | 	bucket, sliding  | 	Which rate-limiting strategy to use  |
 
 #**Responses:**
-_**Allowed:**_
-'''
-200 OK
+**Allowed:**
+_200 OK
 X-RateLimit-Remaining: 3.5
-{"status": "allowed", "client_id": "client1"}
-'''
+{"status": "allowed", "client_id": "client1"}_
 
-_**Denied:**_
-'''
-429 Too Many Requests
+**Denied:**
+_429 Too Many Requests
 X-RateLimit-Remaining: 0
-{"detail": "Try After Sometime"}
-'''
+{"detail": "Try After Sometime"}_
 
 #**Running locally**
 _**Prerequisites:** Python 3.x, Docker Desktop_
 
 1. **Start Redis:**
-'''
-bash
-docker run -d --name redis-rl -p 6379:6379 redis
-'''
+_bash
+docker run -d --name redis-rl -p 6379:6379 redis_
+
 2. **Install dependencies:**
-'''
-bash
-pip install fastapi uvicorn redis
-'''
+_bash
+pip install fastapi uvicorn redis_
+
 3. **Run the server:**
-'''
-bash
-uvicorn main:app --workers 4
-'''
+_bash
+uvicorn main:app --workers 4_
+
 4. **Test it:**
-'''
-bash
+_bash
 curl -i -H "X-Client-Id: client1" http://127.0.0.1:8000/check
-curl -i -H "X-Client-Id: client1" "http://127.0.0.1:8000/check?mode=sliding"
-'''
+curl -i -H "X-Client-Id: client1" "http://127.0.0.1:8000/check?mode=sliding"_
+
 **Load testing**
-'''
-bash
-k6 run loadtest.js
-'''
+_bash
+k6 run loadtest.js_
 
 **Result**: 500 concurrent virtual users, 600+ requests/second sustained, correct allow/deny decisions throughout — with fewer than 1% of requests failing at the connection level (OS-level socket limits on a single local dev machine, not application logic).
 
