@@ -5,8 +5,8 @@ A standalone rate-limiting API; not a library, but a real networked service that
 Every client (identified by an X-Client-Id header) gets their own isolated "bucket" of tokens. Each request costs 1 token. Tokens refill continuously over time, up to a max capacity. When a client runs out of tokens, further requests are denied with a 429 Too Many Requests until enough time passes for tokens to refill.
 
 Two rate-limiting strategies are supported, selectable per request:
-• Token Bucket (default) - allows short bursts, refills continuously
-• Sliding Window - counts requests in a rolling time window, no burst allowance
+1. Token Bucket (default) - allows short bursts, refills continuously
+2. Sliding Window - counts requests in a rolling time window, no burst allowance
 
 # **Tech stack**
 • Python - core algorithm and API logic
@@ -74,14 +74,14 @@ k6 run loadtest.js_
 **Result**: 500 concurrent virtual users, 600+ requests/second sustained, correct allow/deny decisions throughout — with fewer than 1% of requests failing at the connection level (OS-level socket limits on a single local dev machine, not application logic).
 
 # **What I'd add next**
-• Per-client configurable limits via an admin endpoint (currently global constants).
-• TTL on Redis keys so inactive clients' data expires automatically.
-• Distributed mode — multiple rate limiter instances sharing state correctly.
-• Production-grade deployment (multiple workers behind a load balancer, container orchestration).
+1. Per-client configurable limits via an admin endpoint (currently global constants).
+2. TTL on Redis keys so inactive clients' data expires automatically.
+3. Distributed mode — multiple rate limiter instances sharing state correctly.
+4. Production-grade deployment (multiple workers behind a load balancer, container orchestration).
 
 # **What I learned**
-• Why elapsed-time-based refill (not fixed "ticks") is required for correctness.
-• How Redis's atomic command execution solves race conditions without manual locking.
-• Why persistence matters — proved it by draining a client's tokens, restarting the server, and confirming Redis remembered the state.
-• Real infrastructure debugging: Docker container lifecycle, WSL2 as Docker's engine on Windows, PowerShell's curl alias trap.
-• FastAPI specifics: header injection, custom response headers, and how exceptions bypass normal response objects.
+1. Why elapsed-time-based refill (not fixed "ticks") is required for correctness.
+2. How Redis's atomic command execution solves race conditions without manual locking.
+3. Why persistence matters — proved it by draining a client's tokens, restarting the server, and confirming Redis remembered the state.
+4. Real infrastructure debugging: Docker container lifecycle, WSL2 as Docker's engine on Windows, PowerShell's curl alias trap.
+5. FastAPI specifics: header injection, custom response headers, and how exceptions bypass normal response objects.
