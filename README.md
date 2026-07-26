@@ -99,3 +99,15 @@ k6 run loadtest.js
 3. Why persistence matters — proved it by draining a client's tokens, restarting the server, and confirming Redis remembered the state.
 4. Real infrastructure debugging: Docker container lifecycle, WSL2 as Docker's engine on Windows, PowerShell's curl alias trap.
 5. FastAPI specifics: header injection, custom response headers, and how exceptions bypass normal response objects.
+
+# Author
+Rashika Jangra 
+[GitHub](https://github.com/rashikajangra)
+
+
+# License
+This project is licensed under the MIT License — see the
+[LICENSE](LICENSE) file for details.
+
+
+ #If this helped you, give it a star⭐!
