@@ -38,38 +38,52 @@ Query Parameters:
 
 # **Responses:**
 **Allowed:**
-_200 OK
+```
+200 OK
 X-RateLimit-Remaining: 3.5
-{"status": "allowed", "client_id": "client1"}_
+{"status": "allowed", "client_id": "client1"}
+```
 
 **Denied:**
-_429 Too Many Requests
+```
+429 Too Many Requests
 X-RateLimit-Remaining: 0
-{"detail": "Try After Sometime"}_
+{"detail": "Try After Sometime"}
+```
 
 # **Running locally**
 _**Prerequisites:** Python 3.x, Docker Desktop_
 
 1. **Start Redis:**
-_bash
-docker run -d --name redis-rl -p 6379:6379 redis_
+```
+bash
+docker run -d --name redis-rl -p 6379:6379 redis
+```
 
 2. **Install dependencies:**
-_bash
-pip install fastapi uvicorn redis_
+```
+bash
+pip install fastapi uvicorn redis
+```
 
 3. **Run the server:**
-_bash
+```
+bash
 uvicorn main:app --workers 4_
+```
 
 4. **Test it:**
-_bash
+```
+bash
 curl -i -H "X-Client-Id: client1" http://127.0.0.1:8000/check
-curl -i -H "X-Client-Id: client1" "http://127.0.0.1:8000/check?mode=sliding"_
+curl -i -H "X-Client-Id: client1" "http://127.0.0.1:8000/check?mode=sliding"
+```
 
 **Load testing**
-_bash
-k6 run loadtest.js_
+```
+bash
+k6 run loadtest.js
+```
 
 **Result**: 500 concurrent virtual users, 600+ requests/second sustained, correct allow/deny decisions throughout — with fewer than 1% of requests failing at the connection level (OS-level socket limits on a single local dev machine, not application logic).
 
